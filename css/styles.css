@@ -1,0 +1,11 @@
+.custom-modal {
+    padding: 15px;
+  }
+  
+  .btn-close {
+    font-size: 1.5rem;
+  }
+  
+  #dataContainer .btn {
+    margin-bottom: 10px;
+  }

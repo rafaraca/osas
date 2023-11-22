@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Wars API Viewer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script defer src="js/main.js"></script>
+</head>
+<body>
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Star Wars API Viewer</h1>
+
+    <div class="form-group">
+        <label for="entitySelect">Selecione uma entidade:</label>
+        <select class="form-control" id="entitySelect">
+            <option value="films">Films</option>
+            <option value="people">People</option>
+            <option value="planets">Planets</option>
+            <option value="species">Species</option>
+            <option value="starships">Starships</option>
+            <option value="vehicles">Vehicles</option>
+        </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="fetchData()">Listar Itens</button>
+
+    <div class="mt-4" id="dataContainer">
+        <!-- API DATE -->
+    </div>
+</div>
+
+</body>
+</html>
