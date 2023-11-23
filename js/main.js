@@ -1,4 +1,6 @@
 async function fetchData() {
+    showLoader(); 
+
     const selectedEntity = document.getElementById("entitySelect").value;
     const apiUrl = `https://swapi.dev/api/${selectedEntity}/`;
 
@@ -13,6 +15,8 @@ async function fetchData() {
         displayData(data.results, selectedEntity);
     } catch (error) {
         console.error(`Erro na requisição: ${error}`);
+    } finally {
+        hideLoader(); 
     }
 }
 
@@ -61,6 +65,16 @@ function displayData(data, selectedEntity) {
 
     table.appendChild(tbody);
     dataContainer.appendChild(table);
+}
+
+function showLoader() {
+    const loaderContainer = document.getElementById("loader-container");
+    loaderContainer.style.display = "flex";
+}
+
+function hideLoader() {
+    const loaderContainer = document.getElementById("loader-container");
+    loaderContainer.style.display = "none";
 }
 
 async function getDetails(entity, url) {
