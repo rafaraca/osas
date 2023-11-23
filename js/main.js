@@ -2,16 +2,15 @@ function fetchData() {
     const selectedEntity = document.getElementById("entitySelect").value;
     const apiUrl = `https://swapi.dev/api/${selectedEntity}/`;
 
-    $.ajax({
-        url: apiUrl,
-        method: "GET",
-        success: function (data) {
-            displayData(data.results, selectedEntity);
-        },
-        error: function (error) {
-            console.error("Erro na requisição:", error);
-        },
-    });
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro na requisição: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => displayData(data.results, selectedEntity))
+        .catch(error => console.error(error));
 }
 
 function displayData(data, selectedEntity) {
@@ -37,7 +36,6 @@ function displayData(data, selectedEntity) {
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
-    // Linhas de dados
     data.forEach((item) => {
         const row = document.createElement("tr");
         Object.values(item).forEach((value) => {
@@ -46,57 +44,74 @@ function displayData(data, selectedEntity) {
             row.appendChild(td);
         });
 
-        row.addEventListener("click", function () {
-            getDetails(selectedEntity, item.url);
+        row.addEventListener("click", async function (event) {
+            try {
+                const details = await getDetails(selectedEntity, item.url);
+                showDetails(selectedEntity, details, event);
+            } catch (error) {
+                console.error(`Erro na obtenção de detalhes: ${error}`);
+            }
         });
 
         tbody.appendChild(row);
     });
+
     table.appendChild(tbody);
     dataContainer.appendChild(table);
 }
 
-    function getDetails(entity, url) {
-        $.ajax({
-            url: url,
-            method: "GET",
-            success: function (details) {
-                showModal(entity, details);
-            },
-            error: function (error) {
-                console.error("Erro na obtenção de detalhes:", error);
-            },
-        });
+async function getDetails(entity, url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Erro na requisição: ${response.statusText}`);
     }
+    return response.json();
+}
 
-    function showModal(entity, details) {
-        const modalContent = `
-            <div class="modal" id="detailsModal" tabindex="-1" role="dialog">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">${entity} Details</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <pre>${JSON.stringify(details, null, 2)}</pre>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+function showDetails(entity, details, event) {
+    // Verifique se o evento e event.target estão definidos
+    if (event && event.target) {
+        // Crie uma div para mostrar os detalhes
+        const detailsContainer = document.createElement("div");
+        detailsContainer.classList.add("details-container", "mt-3");
+
+        // Adicione o conteúdo dos detalhes à div
+        const detailsContent = `
+            <h3 class="mb-3">${entity} Details</h3>
+            <pre>${JSON.stringify(details, null, 2)}</pre>
         `;
+        detailsContainer.innerHTML = detailsContent;
 
-        document.body.insertAdjacentHTML("beforeend", modalContent);
+        // Encontre o elemento pai (a linha clicada) e anexe os detalhes abaixo dele
+        const clickedRow = event.target.closest("tr");
+        if (clickedRow) {
+            clickedRow.parentNode.insertBefore(detailsContainer, clickedRow.nextSibling);
 
-        const detailsModal = new bootstrap.Modal(document.getElementById("detailsModal"));
-        detailsModal.show();
+            // Adicione um botão para fechar os detalhes
+            const closeButton = document.createElement("button");
+            closeButton.textContent = "Fechar Detalhes";
+            closeButton.classList.add("btn", "btn-secondary", "mt-3");
+            closeButton.addEventListener("click", function () {
+                // Remova a div de detalhes ao clicar no botão
+                detailsContainer.remove();
+            });
 
-        detailsModal._element.addEventListener("hidden.bs.modal", function (e) {
-            detailsModal._element.remove();
-        });
+            // Adicione o botão à div de detalhes
+            detailsContainer.appendChild(closeButton);
+        } else {
+            console.error("Elemento pai não encontrado.");
+        }
+    } else {
+        console.error("Evento ou event.target não definidos.");
     }
+}
+
+
+
+
+
+
+
+
+

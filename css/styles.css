@@ -9,3 +9,8 @@
   #dataContainer .btn {
     margin-bottom: 10px;
   }
+
+  .details-container button {
+    position: relative;
+    z-index: 1000; 
+}
