@@ -1,16 +1,19 @@
-function fetchData() {
+async function fetchData() {
     const selectedEntity = document.getElementById("entitySelect").value;
     const apiUrl = `https://swapi.dev/api/${selectedEntity}/`;
 
-    fetch(apiUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Erro na requisição: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => displayData(data.results, selectedEntity))
-        .catch(error => console.error(error));
+    try {
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+            throw new Error(`Erro na requisição: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        displayData(data.results, selectedEntity);
+    } catch (error) {
+        console.error(`Erro na requisição: ${error}`);
+    }
 }
 
 function displayData(data, selectedEntity) {
@@ -23,7 +26,7 @@ function displayData(data, selectedEntity) {
     }
 
     const table = document.createElement("table");
-    table.classList.add("table", "table-bordered", "mt-3");
+    table.classList.add("table", "table-bordered", "mt-3", "table-dark");
     const thead = document.createElement("thead");
     const tbody = document.createElement("tbody");
 
@@ -62,56 +65,68 @@ function displayData(data, selectedEntity) {
 
 async function getDetails(entity, url) {
     const response = await fetch(url);
+
     if (!response.ok) {
         throw new Error(`Erro na requisição: ${response.statusText}`);
     }
+
     return response.json();
 }
 
-
 function showDetails(entity, details, event) {
-    // Verifique se o evento e event.target estão definidos
     if (event && event.target) {
-        // Crie uma div para mostrar os detalhes
         const detailsContainer = document.createElement("div");
-        detailsContainer.classList.add("details-container", "mt-3");
+        detailsContainer.classList.add("card", "mt-3", "text-white", "bg-dark");
 
-        // Adicione o conteúdo dos detalhes à div
-        const detailsContent = `
-            <h3 class="mb-3">${entity} Details</h3>
-            <pre>${JSON.stringify(details, null, 2)}</pre>
+        const cardContent = `
+            <div class="card-header">
+                <h3 class="mb-0">${entity} Details</h3>
+            </div>
+            <div class="card-body">
+                ${formatDetails(details)}
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-secondary" onclick="closeDetails(this)">Fechar Detalhes</button>
+            </div>
         `;
-        detailsContainer.innerHTML = detailsContent;
+        detailsContainer.innerHTML = cardContent;
 
-        // Encontre o elemento pai (a linha clicada) e anexe os detalhes abaixo dele
         const clickedRow = event.target.closest("tr");
         if (clickedRow) {
             clickedRow.parentNode.insertBefore(detailsContainer, clickedRow.nextSibling);
-
-            // Adicione um botão para fechar os detalhes
-            const closeButton = document.createElement("button");
-            closeButton.textContent = "Fechar Detalhes";
-            closeButton.classList.add("btn", "btn-secondary", "mt-3");
-            closeButton.addEventListener("click", function () {
-                // Remova a div de detalhes ao clicar no botão
-                detailsContainer.remove();
-            });
-
-            // Adicione o botão à div de detalhes
-            detailsContainer.appendChild(closeButton);
         } else {
             console.error("Elemento pai não encontrado.");
+            return;
         }
     } else {
         console.error("Evento ou event.target não definidos.");
     }
 }
 
+function formatDetails(details) {
+    let formattedDetails = "";
 
+    for (const key in details) {
+        if (details.hasOwnProperty(key)) {
+            if (typeof details[key] !== "object") {
+                formattedDetails += `<p><strong>${key}:</strong> ${details[key]}</p>`;
+            } else {
+                formattedDetails += `<p><strong>${key}:</strong></p>`;
+                for (const subKey in details[key]) {
+                    if (details[key].hasOwnProperty(subKey)) {
+                        formattedDetails += `<p class="ml-3"><strong>${subKey}:</strong> ${details[key][subKey]}</p>`;
+                    }
+                }
+            }
+        }
+    }
 
+    return formattedDetails;
+}
 
-
-
-
-
-
+function closeDetails(button) {
+    const detailsContainer = button.closest(".card");
+    if (detailsContainer) {
+        detailsContainer.remove();
+    }
+}

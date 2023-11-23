@@ -1,16 +1,138 @@
-.custom-modal {
-    padding: 15px;
-  }
-  
-  .btn-close {
-    font-size: 1.5rem;
-  }
-  
-  #dataContainer .btn {
-    margin-bottom: 10px;
-  }
+/* Reset de estilos padrão */
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol,
+li,
+table,
+th,
+td {
+    margin: 0;
+    padding: 0;
+}
 
-  .details-container button {
-    position: relative;
-    z-index: 1000; 
+/* Estilo da página */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #000;
+    color: #fff;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+    color: #ffd700; /* Amarelo Star Wars */
+}
+
+/* Formulário e botão */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background-color: #007bff; /* Azul Star Wars */
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* Tabela */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table th,
+.table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+/* Detalhes em card */
+.card {
+    width: 100%;
+    max-width: 400px;
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card-header {
+    background-color: #555;
+    padding: 10px;
+    color: #ffd700; /* Amarelo Star Wars */
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-footer {
+    background-color: #555;
+    padding: 10px;
+    text-align: center;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #ffd700;
+}
+
+.card-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #bbb;
+}
+
+.card-text {
+    color: #ddd;
+}
+
+.card-info {
+    display: flex;
+    justify-content: space-between;
+}
+
+.card-info-item {
+    flex: 1;
+    margin-right: 10px;
+}
+
+
+.btn-secondary {
+    background-color: #6c757d; /* Cinza Star Wars */
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
 }
