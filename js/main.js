@@ -1,17 +1,23 @@
-function fetchData() {
+async function fetchData() {
+    showLoader(); 
+
     const selectedEntity = document.getElementById("entitySelect").value;
     const apiUrl = `https://swapi.dev/api/${selectedEntity}/`;
 
-    $.ajax({
-        url: apiUrl,
-        method: "GET",
-        success: function (data) {
-            displayData(data.results, selectedEntity);
-        },
-        error: function (error) {
-            console.error("Erro na requisição:", error);
-        },
-    });
+    try {
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+            throw new Error(`Erro na requisição: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        displayData(data.results, selectedEntity);
+    } catch (error) {
+        console.error(`Erro na requisição: ${error}`);
+    } finally {
+        hideLoader(); 
+    }
 }
 
 function displayData(data, selectedEntity) {
@@ -24,7 +30,7 @@ function displayData(data, selectedEntity) {
     }
 
     const table = document.createElement("table");
-    table.classList.add("table", "table-bordered", "mt-3");
+    table.classList.add("table", "table-bordered", "mt-3", "table-dark");
     const thead = document.createElement("thead");
     const tbody = document.createElement("tbody");
 
@@ -37,7 +43,6 @@ function displayData(data, selectedEntity) {
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
-    // Linhas de dados
     data.forEach((item) => {
         const row = document.createElement("tr");
         Object.values(item).forEach((value) => {
@@ -46,57 +51,96 @@ function displayData(data, selectedEntity) {
             row.appendChild(td);
         });
 
-        row.addEventListener("click", function () {
-            getDetails(selectedEntity, item.url);
+        row.addEventListener("click", async function (event) {
+            try {
+                const details = await getDetails(selectedEntity, item.url);
+                showDetails(selectedEntity, details, event);
+            } catch (error) {
+                console.error(`Erro na obtenção de detalhes: ${error}`);
+            }
         });
 
         tbody.appendChild(row);
     });
+
     table.appendChild(tbody);
     dataContainer.appendChild(table);
 }
 
-    function getDetails(entity, url) {
-        $.ajax({
-            url: url,
-            method: "GET",
-            success: function (details) {
-                showModal(entity, details);
-            },
-            error: function (error) {
-                console.error("Erro na obtenção de detalhes:", error);
-            },
-        });
+function showLoader() {
+    const loaderContainer = document.getElementById("loader-container");
+    loaderContainer.style.display = "flex";
+}
+
+function hideLoader() {
+    const loaderContainer = document.getElementById("loader-container");
+    loaderContainer.style.display = "none";
+}
+
+async function getDetails(entity, url) {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`Erro na requisição: ${response.statusText}`);
     }
 
-    function showModal(entity, details) {
-        const modalContent = `
-            <div class="modal" id="detailsModal" tabindex="-1" role="dialog">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">${entity} Details</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <pre>${JSON.stringify(details, null, 2)}</pre>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                        </div>
-                    </div>
-                </div>
+    return response.json();
+}
+
+function showDetails(entity, details, event) {
+    if (event && event.target) {
+        const detailsContainer = document.createElement("div");
+        detailsContainer.classList.add("card", "mt-3", "text-white", "bg-dark");
+
+        const cardContent = `
+            <div class="card-header">
+                <h3 class="mb-0">${entity} Details</h3>
+            </div>
+            <div class="card-body">
+                ${formatDetails(details)}
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-secondary" onclick="closeDetails(this)">Fechar Detalhes</button>
             </div>
         `;
+        detailsContainer.innerHTML = cardContent;
 
-        document.body.insertAdjacentHTML("beforeend", modalContent);
-
-        const detailsModal = new bootstrap.Modal(document.getElementById("detailsModal"));
-        detailsModal.show();
-
-        detailsModal._element.addEventListener("hidden.bs.modal", function (e) {
-            detailsModal._element.remove();
-        });
+        const clickedRow = event.target.closest("tr");
+        if (clickedRow) {
+            clickedRow.parentNode.insertBefore(detailsContainer, clickedRow.nextSibling);
+        } else {
+            console.error("Elemento pai não encontrado.");
+            return;
+        }
+    } else {
+        console.error("Evento ou event.target não definidos.");
     }
+}
+
+function formatDetails(details) {
+    let formattedDetails = "";
+
+    for (const key in details) {
+        if (details.hasOwnProperty(key)) {
+            if (typeof details[key] !== "object") {
+                formattedDetails += `<p><strong>${key}:</strong> ${details[key]}</p>`;
+            } else {
+                formattedDetails += `<p><strong>${key}:</strong></p>`;
+                for (const subKey in details[key]) {
+                    if (details[key].hasOwnProperty(subKey)) {
+                        formattedDetails += `<p class="ml-3"><strong>${subKey}:</strong> ${details[key][subKey]}</p>`;
+                    }
+                }
+            }
+        }
+    }
+
+    return formattedDetails;
+}
+
+function closeDetails(button) {
+    const detailsContainer = button.closest(".card");
+    if (detailsContainer) {
+        detailsContainer.remove();
+    }
+}
